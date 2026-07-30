@@ -113,7 +113,7 @@
       </div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <p class="lead" style="margin:0">Assign points to each hobby. Slider or type a number. Total must be ≤ 100.</p>
+          <p class="lead" style="margin:0">Assign points to each hobby. Slider or type a number. Max <b>3</b> per hobby, <b>100</b> total.</p>
           <button id="clearBtn" class="ghost">Reset to 0</button>
         </div>
         <div id="hobbyList"></div>
@@ -171,6 +171,7 @@ const HOBBIES_BY_OWNER = {
 };
 
 const MAX_POINTS = 100;
+const MAX_PER_HOBBY = 3;
 
 /* Build flat hobby list with stable ids */
 const HOBBIES = [];
@@ -231,15 +232,15 @@ function renderRate(){
     row.innerHTML=`
       <div class="owner-tag" style="background:${playerColor(h.owner)}"></div>
       <div class="name">${escapeHtml(h.name)} <span class="by">— ${h.owner}</span></div>
-      <input type="range" min="0" max="100" value="${val}" data-id="${h.id}" class="rng">
-      <input type="number" min="0" max="100" value="${val}" data-id="${h.id}" class="num">`;
+      <input type="range" min="0" max="${MAX_PER_HOBBY}" value="${val}" data-id="${h.id}" class="rng">
+      <input type="number" min="0" max="${MAX_PER_HOBBY}" value="${val}" data-id="${h.id}" class="num">`;
     list.appendChild(row);
   });
   list.querySelectorAll('.rng').forEach(r=>r.oninput=()=>{
     const num=list.querySelector(`.num[data-id="${r.dataset.id}"]`); num.value=r.value; recalc();
   });
   list.querySelectorAll('.num').forEach(n=>n.oninput=()=>{
-    let v=Math.max(0,Math.min(100,parseInt(n.value)||0));
+    let v=Math.max(0,Math.min(MAX_PER_HOBBY,parseInt(n.value)||0)); n.value=v;
     const rng=list.querySelector(`.rng[data-id="${n.dataset.id}"]`); rng.value=v; recalc();
   });
   recalc();
