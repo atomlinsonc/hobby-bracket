@@ -37,9 +37,14 @@
   .hobby-row .owner-tag{width:6px;align-self:stretch;border-radius:4px;min-height:26px}
   .hobby-row .name{flex:1;font-size:15px}
   .hobby-row .by{font-size:12px;color:var(--muted)}
-  .hobby-row input[type=number]{width:74px;background:#0d0f14;border:1px solid var(--line);color:var(--text);
-    border-radius:8px;padding:8px;font-size:15px;text-align:center}
-  .hobby-row input[type=range]{width:150px}
+  .stepper{display:flex;align-items:center;gap:6px}
+  .stepper input[type=number]{width:52px;background:#0d0f14;border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:8px;font-size:16px;font-weight:700;text-align:center;-moz-appearance:textfield}
+  .stepper input[type=number]::-webkit-inner-spin-button,.stepper input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  .stepper .step{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);
+    color:var(--text);font-size:20px;line-height:1;font-weight:700;cursor:pointer;user-select:none;flex-shrink:0}
+  .stepper .step:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+  .stepper .step:active{transform:scale(.94)}
   button.primary{background:var(--accent);color:#111;border:none;padding:11px 20px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer}
   button.primary:disabled{opacity:.4;cursor:not-allowed}
   button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px 16px;border-radius:9px;cursor:pointer;font-size:14px}
@@ -232,16 +237,20 @@ function renderRate(){
     row.innerHTML=`
       <div class="owner-tag" style="background:${playerColor(h.owner)}"></div>
       <div class="name">${escapeHtml(h.name)} <span class="by">— ${h.owner}</span></div>
-      <input type="range" min="0" max="${MAX_PER_HOBBY}" value="${val}" data-id="${h.id}" class="rng">
-      <input type="number" min="0" max="${MAX_PER_HOBBY}" value="${val}" data-id="${h.id}" class="num">`;
+      <div class="stepper">
+        <button type="button" class="step minus" data-id="${h.id}" data-dir="-1" aria-label="minus">−</button>
+        <input type="number" min="0" max="${MAX_PER_HOBBY}" value="${val}" data-id="${h.id}" class="num">
+        <button type="button" class="step plus" data-id="${h.id}" data-dir="1" aria-label="plus">+</button>
+      </div>`;
     list.appendChild(row);
   });
-  list.querySelectorAll('.rng').forEach(r=>r.oninput=()=>{
-    const num=list.querySelector(`.num[data-id="${r.dataset.id}"]`); num.value=r.value; recalc();
-  });
   list.querySelectorAll('.num').forEach(n=>n.oninput=()=>{
-    let v=Math.max(0,Math.min(MAX_PER_HOBBY,parseInt(n.value)||0)); n.value=v;
-    const rng=list.querySelector(`.rng[data-id="${n.dataset.id}"]`); rng.value=v; recalc();
+    let v=Math.max(0,Math.min(MAX_PER_HOBBY,parseInt(n.value)||0)); n.value=v; recalc();
+  });
+  list.querySelectorAll('.step').forEach(b=>b.onclick=()=>{
+    const n=list.querySelector(`.num[data-id="${b.dataset.id}"]`);
+    let v=(parseInt(n.value)||0)+parseInt(b.dataset.dir);
+    n.value=Math.max(0,Math.min(MAX_PER_HOBBY,v)); recalc();
   });
   recalc();
 }
