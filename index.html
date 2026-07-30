@@ -134,6 +134,10 @@
 
   <!-- BRACKET -->
   <section id="bracket" class="view">
+    <div id="publishedBanner" class="card" style="display:none;border-color:var(--accent)">
+      <h3 style="margin-top:0">📢 Official published results</h3>
+      <p class="lead" id="publishedMeta" style="margin-bottom:0">These are the final results everyone can see.</p>
+    </div>
     <div class="card">
       <h3 style="margin-top:0">Load everyone's ratings</h3>
       <p class="lead">Paste each player's code below (blank ones are pulled from this device if you rated here). Then generate the bracket.</p>
@@ -146,7 +150,10 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
           <h3 style="margin:0">The bracket</h3>
-          <button id="downloadBtn" class="primary">⬇ Download image</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="publishBtn" class="ghost">📌 Publish to site</button>
+            <button id="downloadBtn" class="primary">⬇ Download image</button>
+          </div>
         </div>
         <div class="legend" id="legend" style="margin-top:12px"></div>
         <div class="bracket-wrap"><div id="bracketEl" class="bracket"></div></div>
@@ -197,6 +204,8 @@ const LS_KEY = "hobbyBracket.v1";
 function loadStore(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return{}}}
 function saveStore(s){localStorage.setItem(LS_KEY, JSON.stringify(s));}
 let currentPlayer = null;
+let PUBLISHED = null;      // filled from results.json if present
+let PUBLISHED_META = null;
 
 /* ========= Navigation ========= */
 function show(view){
@@ -317,7 +326,9 @@ function renderLoadBoxes(){
 function collectSubmissions(){
   const store=loadStore();
   const subs={};
-  // device-saved first
+  // published results (committed to the site) form the base
+  if(PUBLISHED) PLAYERS.forEach(p=>{if(PUBLISHED[p.name])subs[p.name]=PUBLISHED[p.name];});
+  // device-saved next
   PLAYERS.forEach(p=>{if(store[p.name]&&store[p.name].submitted)subs[p.name]=store[p.name].scores;});
   // pasted codes override
   document.querySelectorAll('#loadBoxes textarea').forEach(t=>{
@@ -458,6 +469,41 @@ document.getElementById('downloadBtn').onclick=async ()=>{
   btn.disabled=false; btn.textContent='⬇ Download image';
 };
 
+/* ========= Publish results (export results.json) ========= */
+document.getElementById('publishBtn').onclick=()=>{
+  const subs=collectSubmissions();
+  const have=Object.keys(subs).length;
+  if(have<PLAYERS.length && !confirm(`Only ${have} of ${PLAYERS.length} players are loaded. Publish anyway?`)) return;
+  const payload={publishedAt:new Date().toISOString(), submissions:subs};
+  const text=JSON.stringify(payload,null,2);
+  // download results.json so it can be committed to the repo
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+  a.download='results.json'; a.click(); URL.revokeObjectURL(a.href);
+  navigator.clipboard&&navigator.clipboard.writeText(text).catch(()=>{});
+  toast('results.json downloaded — add it to the repo to publish');
+};
+
+/* ========= Load published results.json on startup ========= */
+async function loadPublished(){
+  try{
+    const res=await fetch('results.json?v='+Date.now());
+    if(!res.ok) return;
+    const data=await res.json();
+    if(data&&data.submissions&&Object.keys(data.submissions).length){
+      PUBLISHED=data.submissions; PUBLISHED_META=data.publishedAt||null;
+      const banner=document.getElementById('publishedBanner');
+      banner.style.display='block';
+      if(PUBLISHED_META) document.getElementById('publishedMeta').textContent=
+        'Final results — published '+new Date(PUBLISHED_META).toLocaleString()+'. Anyone can view them here.';
+      renderStatus();
+      // auto-show the bracket to any visitor
+      show('bracket');
+      document.getElementById('genBtn').click();
+    }
+  }catch(e){/* no published results yet */}
+}
+
 /* ========= utils ========= */
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let toastTimer;
@@ -469,6 +515,7 @@ renderPeople();
 renderLoadBoxes();
 renderLegend();
 renderStatus();
+loadPublished();
 </script>
 </body>
 </html>
