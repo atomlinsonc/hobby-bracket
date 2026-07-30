@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hobby Bracket 64</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#181b22; --panel2:#1f232c; --line:#2b303b;
+    --text:#e7e9ee; --muted:#9aa2b1; --accent:#f5c518;
+    --austin:#2563eb; --aaron:#16a34a; --paul:#ea580c; --gill:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.4}
+  header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  h1{font-size:20px;margin:0;letter-spacing:.5px}
+  h1 span{color:var(--accent)}
+  nav{display:flex;gap:8px;flex-wrap:wrap}
+  nav button{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px}
+  nav button.active{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+  main{max-width:1100px;margin:0 auto;padding:22px 20px 80px}
+  .view{display:none}
+  .view.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px}
+  p.lead{color:var(--muted);margin-top:0}
+  .people{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .person-btn{border:2px solid var(--line);border-radius:12px;padding:22px;font-size:18px;font-weight:700;cursor:pointer;background:var(--panel2);color:var(--text);text-align:left;transition:transform .05s}
+  .person-btn:hover{transform:translateY(-2px)}
+  .person-btn small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:6px}
+  .dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:middle}
+  .ratebar{position:sticky;top:0;z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .ratebar .big{font-size:22px;font-weight:800}
+  .ratebar .over{color:#ff6b6b}
+  .ratebar .ok{color:#4ade80}
+  .hobby-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--panel2)}
+  .hobby-row .owner-tag{width:6px;align-self:stretch;border-radius:4px;min-height:26px}
+  .hobby-row .name{flex:1;font-size:15px}
+  .hobby-row .by{font-size:12px;color:var(--muted)}
+  .hobby-row input[type=number]{width:74px;background:#0d0f14;border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:8px;font-size:15px;text-align:center}
+  .hobby-row input[type=range]{width:150px}
+  button.primary{background:var(--accent);color:#111;border:none;padding:11px 20px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer}
+  button.primary:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px 16px;border-radius:9px;cursor:pointer;font-size:14px}
+  textarea{width:100%;min-height:70px;background:#0d0f14;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+  .codebox{background:#0d0f14;border:1px dashed var(--accent);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;color:var(--accent)}
+  label.small{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .status-chip{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;display:flex;align-items:center;justify-content:space-between}
+  .status-chip .yes{color:#4ade80;font-weight:700}
+  .status-chip .no{color:#ff6b6b}
+  /* Bracket */
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .legend span{font-size:13px;color:var(--muted)}
+  .bracket-wrap{overflow-x:auto;padding-bottom:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  .bracket{display:flex;gap:26px;padding:18px;min-width:min-content}
+  .round{display:flex;flex-direction:column;justify-content:space-around;min-width:170px}
+  .round h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);text-align:center}
+  .match{display:flex;flex-direction:column;gap:4px;margin:auto 0}
+  .slot{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-left-width:5px;border-radius:6px;padding:6px 8px;font-size:12.5px;min-height:30px}
+  .slot .sd{color:var(--muted);font-size:10px;width:20px;flex-shrink:0}
+  .slot .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .slot .pt{font-weight:700;color:var(--accent);font-size:12px}
+  .slot.win{background:#22262f;border-color:var(--accent)}
+  .slot.lose{opacity:.42}
+  .champ{margin-top:16px;text-align:center;font-size:20px;font-weight:800}
+  .champ .trophy{font-size:26px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#111;padding:10px 18px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .results-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+  .results-table th,.results-table td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+  .results-table td.n{text-align:right;color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>HOBBY <span>BRACKET</span> 64</h1>
+  <nav>
+    <button data-view="home" class="active">Home</button>
+    <button data-view="rate">Rate</button>
+    <button data-view="bracket">Results & Bracket</button>
+  </nav>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <div class="card">
+      <p class="lead">Four players, 16 hobbies each, 64 total. You get <b>100 points</b> to spread across everyone else's hobbies (you can't rate your own). Pick your name to start.</p>
+      <div class="people" id="peoplePicker"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">How it works</h3>
+      <ol style="color:var(--muted);margin:0;padding-left:20px">
+        <li>Each person clicks their name and assigns points (100 total) to the other 48 hobbies.</li>
+        <li>Hit <b>Finish &amp; get my code</b> and send that code to whoever is running the bracket.</li>
+        <li>On <b>Results &amp; Bracket</b>, paste all four codes and the 64-hobby bracket auto-fills — highest score wins each matchup.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- RATE -->
+  <section id="rate" class="view">
+    <div id="ratePrompt" class="card">
+      <p class="lead">Choose who you are on the <b>Home</b> tab first.</p>
+    </div>
+    <div id="rateArea" style="display:none">
+      <div class="ratebar">
+        <div><div style="font-size:13px;color:var(--muted)">Rating as</div><div id="rateWho" class="big"></div></div>
+        <div style="text-align:center"><div style="font-size:13px;color:var(--muted)">Points left</div><div id="rateLeft" class="big ok">100</div></div>
+        <button id="finishBtn" class="primary">Finish &amp; get my code</button>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <p class="lead" style="margin:0">Assign points to each hobby. Slider or type a number. Total must be ≤ 100.</p>
+          <button id="clearBtn" class="ghost">Reset to 0</button>
+        </div>
+        <div id="hobbyList"></div>
+      </div>
+      <div id="codeOut" class="card" style="display:none">
+        <h3 style="margin-top:0">✅ Your code</h3>
+        <p class="lead">Copy this and send it to whoever runs the bracket. Your ratings are also saved on this device.</p>
+        <div id="codeText" class="codebox"></div>
+        <div style="margin-top:12px"><button id="copyCodeBtn" class="primary">Copy code</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRACKET -->
+  <section id="bracket" class="view">
+    <div class="card">
+      <h3 style="margin-top:0">Load everyone's ratings</h3>
+      <p class="lead">Paste each player's code below (blank ones are pulled from this device if you rated here). Then generate the bracket.</p>
+      <div id="loadBoxes"></div>
+      <div class="status-grid" id="statusGrid"></div>
+      <button id="genBtn" class="primary">Generate bracket</button>
+      <button id="loadDeviceBtn" class="ghost" style="margin-left:8px">Load saved from this device</button>
+    </div>
+    <div id="bracketOut" style="display:none">
+      <div class="card">
+        <h3 style="margin-top:0">The bracket</h3>
+        <div class="legend" id="legend"></div>
+        <div class="bracket-wrap"><div id="bracketEl" class="bracket"></div></div>
+        <div id="champEl" class="champ"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Full scoreboard</h3>
+        <table class="results-table" id="scoreTable"></table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ========= DATA — edit hobbies here ========= */
+const PLAYERS = [
+  {name:"Austin", color:"var(--austin)", hex:"#2563eb"},
+  {name:"Aaron",  color:"var(--aaron)",  hex:"#16a34a"},
+  {name:"Paul",   color:"var(--paul)",   hex:"#ea580c"},
+  {name:"Gill",   color:"var(--gill)",   hex:"#7c3aed"},
+];
+
+const HOBBIES_BY_OWNER = {
+  "Austin":["Board games","Golf","Eggs","Cup pissing","Coffee","Johnny Football","Grackles","Fatshots","Overwatch","Science fiction","N64","Poker","Chess","LLL","Shop snacking","Running red lights"],
+  "Aaron":["Wood working","Computer building / home labbing","Pokemon cards","Sports memorabilia","Fishing","Hiking","Real sports fan","Smoking meat","Retro gaming","Games","Whiskey","Selling things on eBay/FB","Basketball","Vibe coding","F-150","Man cave"],
+  "Paul":["Sleep","Movies","Gardening","Hiking","Fire pit","Snow days","Coffee","Spicy foods","Running","The beach","Farmers markets","Haircuts / A&M Football","Saunas","Recreational drugs","Military history","Showering"],
+  "Gill":["Running","Lifting","Pokemon","Anesthesia","Guns and tacticool bullshit","Military history","Hiking","Talking about buying frivolous shit for weeks then doing it and it's unsatisfying","Restaurants","Camping/overlanding videos on YouTube","OAFs","4Runners","Scifi","American postmodern lit","Movies","Cumtown"],
+};
+
+const MAX_POINTS = 100;
+
+/* Build flat hobby list with stable ids */
+const HOBBIES = [];
+PLAYERS.forEach(p=>{
+  (HOBBIES_BY_OWNER[p.name]||[]).forEach((h,i)=>{
+    HOBBIES.push({id:p.name.slice(0,2).toUpperCase()+i, name:h, owner:p.name});
+  });
+});
+const HOBBY_BY_ID = Object.fromEntries(HOBBIES.map(h=>[h.id,h]));
+function playerColor(name){const p=PLAYERS.find(x=>x.name===name);return p?p.hex:"#888";}
+
+/* ========= State / storage ========= */
+const LS_KEY = "hobbyBracket.v1";
+function loadStore(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return{}}}
+function saveStore(s){localStorage.setItem(LS_KEY, JSON.stringify(s));}
+let currentPlayer = null;
+
+/* ========= Navigation ========= */
+function show(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  if(view==='rate') renderRate();
+  if(view==='bracket') renderStatus();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+
+/* ========= Home: people picker ========= */
+function renderPeople(){
+  const el=document.getElementById('peoplePicker'); el.innerHTML='';
+  const store=loadStore();
+  PLAYERS.forEach(p=>{
+    const done = store[p.name] && store[p.name].submitted;
+    const b=document.createElement('button');
+    b.className='person-btn'; b.style.borderColor=p.hex;
+    b.innerHTML=`<span class="dot" style="background:${p.hex}"></span>${p.name}
+      <small>${done?'✅ already rated on this device':'rate the other 48 hobbies'}</small>`;
+    b.onclick=()=>{currentPlayer=p.name; show('rate');};
+    el.appendChild(b);
+  });
+}
+
+/* ========= Rate view ========= */
+function renderRate(){
+  const prompt=document.getElementById('ratePrompt');
+  const area=document.getElementById('rateArea');
+  if(!currentPlayer){prompt.style.display='block';area.style.display='none';return;}
+  prompt.style.display='none';area.style.display='block';
+  document.getElementById('rateWho').textContent=currentPlayer;
+  document.getElementById('rateWho').style.color=playerColor(currentPlayer);
+  document.getElementById('codeOut').style.display='none';
+
+  const store=loadStore();
+  const saved=(store[currentPlayer]&&store[currentPlayer].scores)||{};
+  const list=document.getElementById('hobbyList'); list.innerHTML='';
+  HOBBIES.filter(h=>h.owner!==currentPlayer).forEach(h=>{
+    const val=saved[h.id]||0;
+    const row=document.createElement('div'); row.className='hobby-row';
+    row.innerHTML=`
+      <div class="owner-tag" style="background:${playerColor(h.owner)}"></div>
+      <div class="name">${escapeHtml(h.name)} <span class="by">— ${h.owner}</span></div>
+      <input type="range" min="0" max="100" value="${val}" data-id="${h.id}" class="rng">
+      <input type="number" min="0" max="100" value="${val}" data-id="${h.id}" class="num">`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.rng').forEach(r=>r.oninput=()=>{
+    const num=list.querySelector(`.num[data-id="${r.dataset.id}"]`); num.value=r.value; recalc();
+  });
+  list.querySelectorAll('.num').forEach(n=>n.oninput=()=>{
+    let v=Math.max(0,Math.min(100,parseInt(n.value)||0));
+    const rng=list.querySelector(`.rng[data-id="${n.dataset.id}"]`); rng.value=v; recalc();
+  });
+  recalc();
+}
+function gatherScores(){
+  const s={};
+  document.querySelectorAll('#hobbyList .num').forEach(n=>{
+    const v=parseInt(n.value)||0; if(v>0) s[n.dataset.id]=v;
+  });
+  return s;
+}
+function recalc(){
+  const s=gatherScores();
+  const total=Object.values(s).reduce((a,b)=>a+b,0);
+  const left=MAX_POINTS-total;
+  const el=document.getElementById('rateLeft');
+  el.textContent=left;
+  el.className='big '+(left<0?'over':'ok');
+  document.getElementById('finishBtn').disabled = left<0;
+}
+document.getElementById('finishBtn').onclick=()=>{
+  const s=gatherScores();
+  const total=Object.values(s).reduce((a,b)=>a+b,0);
+  if(total>MAX_POINTS){toast('You are over 100 points.');return;}
+  const store=loadStore();
+  store[currentPlayer]={scores:s, submitted:true, total};
+  saveStore(store);
+  const code=encodeCode({rater:currentPlayer,scores:s});
+  document.getElementById('codeText').textContent=code;
+  document.getElementById('codeOut').style.display='block';
+  document.getElementById('codeOut').scrollIntoView({behavior:'smooth'});
+  renderPeople();
+};
+document.getElementById('clearBtn').onclick=()=>{
+  document.querySelectorAll('#hobbyList .num').forEach(n=>n.value=0);
+  document.querySelectorAll('#hobbyList .rng').forEach(n=>n.value=0);
+  recalc();
+};
+document.getElementById('copyCodeBtn').onclick=()=>{
+  navigator.clipboard.writeText(document.getElementById('codeText').textContent)
+    .then(()=>toast('Code copied!')).catch(()=>toast('Copy failed — select it manually'));
+};
+
+/* ========= Code encode/decode ========= */
+function encodeCode(obj){return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));}
+function decodeCode(str){
+  try{const o=JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
+    if(o&&o.rater&&o.scores)return o;}catch(e){}
+  return null;
+}
+
+/* ========= Bracket: load boxes + status ========= */
+function renderLoadBoxes(){
+  const el=document.getElementById('loadBoxes'); el.innerHTML='';
+  PLAYERS.forEach(p=>{
+    el.insertAdjacentHTML('beforeend',
+      `<label class="small"><span class="dot" style="background:${p.hex}"></span>${p.name}'s code</label>
+       <textarea data-player="${p.name}" placeholder="paste ${p.name}'s code (optional if rated on this device)"></textarea>`);
+  });
+}
+function collectSubmissions(){
+  const store=loadStore();
+  const subs={};
+  // device-saved first
+  PLAYERS.forEach(p=>{if(store[p.name]&&store[p.name].submitted)subs[p.name]=store[p.name].scores;});
+  // pasted codes override
+  document.querySelectorAll('#loadBoxes textarea').forEach(t=>{
+    if(t.value.trim()){const d=decodeCode(t.value); if(d)subs[d.rater]=d.scores; else toast('Bad code for '+t.dataset.player);}
+  });
+  return subs;
+}
+function renderStatus(){
+  const subs=collectSubmissions();
+  const grid=document.getElementById('statusGrid'); grid.innerHTML='';
+  PLAYERS.forEach(p=>{
+    const has=!!subs[p.name];
+    grid.insertAdjacentHTML('beforeend',
+      `<div class="status-chip"><span><span class="dot" style="background:${p.hex}"></span>${p.name}</span>
+       <span class="${has?'yes':'no'}">${has?'loaded ✓':'missing'}</span></div>`);
+  });
+}
+document.querySelector('#bracket').addEventListener('input',e=>{if(e.target.tagName==='TEXTAREA')renderStatus();});
+document.getElementById('loadDeviceBtn').onclick=()=>{renderStatus();toast('Loaded device saves');};
+
+/* ========= Bracket generation ========= */
+function standardSeedOrder(n){
+  let seeds=[1,2];
+  while(seeds.length<n){
+    const sum=seeds.length*2+1; const out=[];
+    seeds.forEach(s=>{out.push(s);out.push(sum-s);});
+    seeds=out;
+  }
+  return seeds;
+}
+document.getElementById('genBtn').onclick=()=>{
+  const subs=collectSubmissions();
+  // total score per hobby = sum across raters (owners never rate own, so fine)
+  const totals=HOBBIES.map(h=>{
+    let t=0; Object.entries(subs).forEach(([rater,sc])=>{if(rater!==h.owner)t+=(sc[h.id]||0);});
+    return {...h, score:t};
+  });
+  // rank: score desc, tie-break alphabetical
+  const ranked=[...totals].sort((a,b)=> b.score-a.score || a.name.localeCompare(b.name));
+  ranked.forEach((h,i)=>h.seed=i+1);
+  const bySeed=Object.fromEntries(ranked.map(h=>[h.seed,h]));
+
+  const order=standardSeedOrder(64);
+  // round 0 slots in seed order
+  let current=order.map(seed=>bySeed[seed]);
+  const rounds=[current];
+  while(current.length>1){
+    const next=[];
+    for(let i=0;i<current.length;i+=2){
+      const a=current[i],b=current[i+1];
+      const win=(a.score>b.score)||(a.score===b.score&&a.seed<b.seed)?a:b;
+      next.push(win);
+    }
+    rounds.push(next);
+    current=next;
+  }
+  renderBracket(rounds);
+  renderScoreTable(ranked);
+  document.getElementById('bracketOut').style.display='block';
+  document.getElementById('bracketOut').scrollIntoView({behavior:'smooth'});
+};
+
+const ROUND_NAMES={64:'Round of 64',32:'Round of 32',16:'Sweet 16',8:'Quarterfinals',4:'Semifinals',2:'Final',1:'Champion'};
+function renderBracket(rounds){
+  const el=document.getElementById('bracketEl'); el.innerHTML='';
+  for(let r=0;r<rounds.length-1;r++){
+    const col=rounds[r];
+    const div=document.createElement('div'); div.className='round';
+    div.innerHTML=`<h4>${ROUND_NAMES[col.length]||('Round '+(r+1))}</h4>`;
+    for(let i=0;i<col.length;i+=2){
+      const a=col[i],b=col[i+1];
+      const win=(a.score>b.score)||(a.score===b.score&&a.seed<b.seed)?a:b;
+      const m=document.createElement('div'); m.className='match';
+      m.appendChild(slotEl(a,win===a));
+      m.appendChild(slotEl(b,win===b));
+      div.appendChild(m);
+    }
+    el.appendChild(div);
+  }
+  // champion column
+  const champ=rounds[rounds.length-1][0];
+  const cdiv=document.createElement('div'); cdiv.className='round';
+  cdiv.innerHTML='<h4>Champion</h4>';
+  const cm=document.createElement('div'); cm.className='match';
+  cm.appendChild(slotEl(champ,true));
+  cdiv.appendChild(cm); el.appendChild(cdiv);
+
+  const ce=document.getElementById('champEl');
+  ce.innerHTML=`<span class="trophy">🏆</span> Champion: <span style="color:${playerColor(champ.owner)}">${escapeHtml(champ.name)}</span> <span style="color:var(--muted);font-size:14px">(${champ.owner} · ${champ.score} pts)</span>`;
+}
+function slotEl(h,won){
+  const d=document.createElement('div');
+  d.className='slot '+(won?'win':'lose');
+  d.style.borderLeftColor=playerColor(h.owner);
+  d.innerHTML=`<span class="sd">#${h.seed}</span><span class="nm" title="${escapeHtml(h.name)} (${h.owner})">${escapeHtml(h.name)}</span><span class="pt">${h.score}</span>`;
+  return d;
+}
+function renderScoreTable(ranked){
+  const t=document.getElementById('scoreTable');
+  t.innerHTML='<tr><th>Seed</th><th>Hobby</th><th>Owner</th><th style="text-align:right">Score</th></tr>';
+  ranked.forEach(h=>{
+    t.insertAdjacentHTML('beforeend',
+      `<tr><td>#${h.seed}</td><td><span class="dot" style="background:${playerColor(h.owner)}"></span>${escapeHtml(h.name)}</td><td>${h.owner}</td><td class="n">${h.score}</td></tr>`);
+  });
+}
+function renderLegend(){
+  const el=document.getElementById('legend'); el.innerHTML='';
+  PLAYERS.forEach(p=>el.insertAdjacentHTML('beforeend',
+    `<span><span class="dot" style="background:${p.hex}"></span>${p.name}</span>`));
+}
+
+/* ========= utils ========= */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let toastTimer;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ========= init ========= */
+renderPeople();
+renderLoadBoxes();
+renderLegend();
+renderStatus();
+</script>
+</body>
+</html>
